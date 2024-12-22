@@ -188,7 +188,7 @@ ng test --code-coverage
 
 ## Security
 
-For security issues, please contact security@yourdomain.com
+For security issues, please contact me on my slack channel
 
 ## License
 
