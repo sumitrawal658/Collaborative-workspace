@@ -188,7 +188,7 @@ ng test --code-coverage
 
 ## Security
 
-For security issues, please contact security@yourdomain.com
+For security issues, please contact me on my slack channel
 
 ## License
 
@@ -196,7 +196,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-For support, email support@yourdomain.com or join our Slack channel.
+For support, email join my Slack channel.
 
 ## Acknowledgments
 
