@@ -1,0 +1,192 @@
+spring:
+  application:
+    name: collaborative-workspace
+
+  # MongoDB Configuration
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/workspace}
+      auto-index-creation: true
+      # Sharding configuration
+      options:
+        max-pool-size: 100
+        min-pool-size: 10
+        max-connection-idle-time: 60000
+        connect-timeout: 10000
+        socket-timeout: 60000
+        server-selection-timeout: 30000
+        replica-set: ${MONGODB_REPLICA_SET:}
+        retry-writes: true
+        retry-reads: true
+        w: majority
+        read-preference: primaryPreferred
+        write-concern:
+          w: majority
+          j: true
+          wtimeout: 5000
+
+  # Security Configuration
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+            scope:
+              - email
+              - profile
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+            scope:
+              - read:user
+              - user:email
+
+  # JWT Configuration
+  jwt:
+    secret: ${JWT_SECRET:your-secret-key}
+    expiration: 86400000 # 24 hours in milliseconds
+    refresh-token:
+      expiration: 604800000 # 7 days in milliseconds
+
+# Server Configuration
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
+
+# AWS Configuration
+aws:
+  region: ${AWS_REGION:us-east-1}
+  access-key: ${AWS_ACCESS_KEY}
+  secret-key: ${AWS_SECRET_KEY}
+  comprehend:
+    enabled: true
+  ses:
+    enabled: true
+    from-email: ${SES_FROM_EMAIL}
+
+# Application Specific Configuration
+app:
+  auth:
+    token-secret: ${TOKEN_SECRET:your-token-secret-key}
+    token-expiration: 86400000
+    allowed-origins:
+      - http://localhost:4200
+      - ${PROD_FRONTEND_URL}
+  
+  # Tenant Configuration
+  tenant:
+    max-users-per-tenant: 100
+    default-features:
+      - notes
+      - collaboration
+      - analytics
+    
+  # Rate Limiting
+  rate-limit:
+    enabled: true
+    default-limit: 100
+    duration: 60 # seconds
+    
+  # WebSocket Configuration
+  websocket:
+    allowed-origins:
+      - http://localhost:4200
+      - ${PROD_FRONTEND_URL}
+    endpoint: /ws
+    destination-prefix: /topic
+    application-prefix: /app
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+  health:
+    mongodb:
+      enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.beetexting.workspace: DEBUG
+    org.springframework.security: INFO
+    org.springframework.web: INFO
+    org.springframework.data.mongodb: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/application.log
+    max-size: 10MB
+    max-history: 7
+
+# Cache Configuration
+spring.cache:
+  type: caffeine
+  cache-names:
+    - users
+    - tenants
+    - notes
+  caffeine:
+    spec: maximumSize=500,expireAfterAccess=600s
+
+# Multitenancy Configuration
+multitenancy:
+  schema-per-tenant: false
+  tenant-identifier-header: X-TenantID
+  default-tenant: default
+  tenant-resolver-mode: HEADER # Options: HEADER, DOMAIN, PATH
+
+# Application specific settings
+app:
+  mongodb:
+    read-preference: ${MONGODB_READ_PREFERENCE:primaryPreferred}
+    write-concern:
+      w: ${MONGODB_WRITE_CONCERN_W:majority}
+      j: ${MONGODB_WRITE_CONCERN_J:true}
+      wtimeout: ${MONGODB_WRITE_CONCERN_TIMEOUT:5000}
+    indexes:
+      auto-create: true
+      background: true
+    sharding:
+      enabled: ${MONGODB_SHARDING_ENABLED:true}
+      chunk-size: ${MONGODB_CHUNK_SIZE:64}
+    collections:
+      notes:
+        shard-key: tenantId
+        shard-key-type: hashed
+      analytics:
+        shard-key: tenantId,dataTimestamp
+        shard-key-type: hashed,1
+
+# Monitoring configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        "[http.server.requests]": true
+      slo:
+        "[http.server.requests]": 50ms, 100ms, 200ms, 500ms
+  health:
+    mongodb:
+      enabled: true

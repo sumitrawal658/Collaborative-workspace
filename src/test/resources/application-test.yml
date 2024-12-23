@@ -1,0 +1,65 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/workspace_test
+      auto-index-creation: true
+
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+          github:
+            client-id: test-client-id
+            client-secret: test-client-secret
+
+aws:
+  region: us-east-1
+  ses:
+    enabled: false
+  comprehend:
+    enabled: false
+
+app:
+  websocket:
+    allowed-origins: http://localhost:4200
+    endpoint: /ws
+    topic-prefix: /topic
+    application-prefix: /app
+
+  jwt:
+    secret: test-secret-key-for-testing-purposes-only
+    expiration: 86400000 # 24 hours
+
+  rate-limit:
+    enabled: true
+    tenant:
+      capacity: 1000
+      time-window: 60 # seconds
+    user:
+      capacity: 100
+      time-window: 60 # seconds
+
+  features:
+    sentiment-analysis: false
+    real-time-collaboration: true
+    offline-mode: true
+    analytics: true
+
+logging:
+  level:
+    root: INFO
+    com.workspace: DEBUG
+    org.springframework.data.mongodb: DEBUG
+    org.springframework.security: DEBUG
